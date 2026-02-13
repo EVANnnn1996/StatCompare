@@ -19,7 +19,7 @@ STATCOMPARE_PREFIX_PATTERN = "^%+(%d+)%%?(.*)$";
 STATCOMPARE_SUFFIX_PATTERN = "^(.*)%+(%d+)%%?$";
 
 STATCOMPARE_ITEMLINK_PATTERN = "|cff(%x+)|Hitem:(%d+:%d+:%d+:%d+)|h%[(.-)%]|h|r";
-STATCOMPARE_DISPLAY_GROUPS = { "EquippedItems", "EquippedEnchants", "ActiveBuffs", "BasicStats", "TalentSpec", "SpellPowerStats" }
+STATCOMPARE_DISPLAY_GROUPS = { "EquippedItems", "EquippedEnchants", "BasicStats", "TalentSpec", "SpellPowerStats" }
 STATCOMPARE_TEXT_INDENT1 = "    "
 STATCOMPARE_TEXT_INDENT2 = "        "
 StatCompre_ColorList = {
@@ -1154,7 +1154,7 @@ function StatCompare_UpdateDisplayedAttributeGroups(attributesToToggle, buttonNa
 end
 
 function StatCompareTargetFrameArmorButton_OnClick()
-	StatCompare_UpdateDisplayedAttributeGroups({"EquippedItems", "EquippedEnchants", "ActiveBuffs"},"StatCompareTargetFrameArmorButton", "StatCompareTargetFrame", "target")
+	StatCompare_UpdateDisplayedAttributeGroups({"EquippedItems", "EquippedEnchants"},"StatCompareTargetFrameArmorButton", "StatCompareTargetFrame", "target")
 end
 
 function StatCompareTargetFrameStatsButton_OnClick()
@@ -1162,7 +1162,7 @@ function StatCompareTargetFrameStatsButton_OnClick()
 end
 
 function StatCompareSelfFrameArmorButton_OnClick()
-	StatCompare_UpdateDisplayedAttributeGroups({"EquippedItems", "EquippedEnchants", "ActiveBuffs"}, "StatCompareSelfFrameArmorButton", "StatCompareSelfFrame", "player")
+	StatCompare_UpdateDisplayedAttributeGroups({"EquippedItems", "EquippedEnchants"}, "StatCompareSelfFrameArmorButton", "StatCompareSelfFrame", "player")
 end
 
 function StatCompareSelfFrameStatsButton_OnClick()
@@ -1180,14 +1180,12 @@ end
 function StatCompare_UpdateFrameContent(frameName, textbody, unit, tiptitle)
 	local titletext = StatCompare_GetTitlebarText(tiptitle)
 	StatCompare_UpdateFrameText(frameName, textbody, titletext)
-	StatBuffs_UpdateBuffs(frameName, unit)
 end
 
 function StatCompare_UpdateFrameText(frameName, textbody, titletext)
 	local frame = getglobal(frameName);
 	local text = getglobal(frameName.."Text");
 	local title = getglobal(frameName.."Title");
-	local buffFrame = getglobal(frame:GetName().."BuffList")
 	local paddingHeightForAesthetics = 20; -- Without this, the content stopped precisely against the words on the bottom.
 	local paddingWidthForAesthetics = 40;  -- Without this, the content stopped precisely against the words on the right.
 	text:SetText(textbody);

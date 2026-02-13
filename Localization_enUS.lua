@@ -54,7 +54,6 @@ function SC_Localization_enUS()
 	STATCOMPARE_CAT_SBON = "Spells";
 	STATCOMPARE_CAT_OBON = "Health & Mana";
 	STATCOMPARE_EQUIPPED = "Equipped Items";
-	STATCOMPARE_ACTIVEBUFFS = "Active Buffs";
 	STATCOMPARE_ATTACKNAME = "Attack";
 	STATCOMPARE_TALENT_SPECIALIZATION="Talent Spec"
 
@@ -356,4 +355,3 @@ function SC_Localization_enUS()
 	STATCOMPARE_SHADOWBURN		= "Shadow Burn";
 	STATCOMPARE_SOUL_FIRE		= "Soul Fire";
 end
-
