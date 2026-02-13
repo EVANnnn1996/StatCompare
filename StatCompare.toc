@@ -13,8 +13,6 @@ Localization_zhCN.lua
 Localization_enUS.lua
 Localization.lua
 
-init\StatCompareTutorial.xml
-
 SCOptions.lua
 StatScanner.lua
 StatCompare.lua
