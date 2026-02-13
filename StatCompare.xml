@@ -235,8 +235,106 @@
         <Scripts>
             <OnHide>
                 StatCompareSelfFrame:Hide();
+                StatCompareTargetEquipFrame:Hide();
+                StatCompareSelfEquipFrame:Hide();
             </OnHide>
         </Scripts>
+    </Frame>
+
+    <Frame name="StatCompareSelfEquipFrame" frameStrata="LOW" toplevel="true" enableMouse="true" movable="true" hidden="true"  parent="UIParent">
+        <TitleRegion setAllPoints="true"/>
+        <Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
+            <EdgeSize>
+                <AbsValue val="16"/>
+            </EdgeSize>
+            <TileSize>
+                <AbsValue val="16"/>
+            </TileSize>
+            <BackgroundInsets>
+                <AbsInset left="5" right="5" top="5" bottom="5"/>
+            </BackgroundInsets>
+        </Backdrop>
+        <Layers>
+            <Layer level="BACKGROUND">
+                <FontString name="StatCompareSelfEquipFrameTitle" inherits="GameTooltipHeaderText">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeTo="StatCompareSelfEquipFrame" relativePoint="TOPLEFT">
+                            <Offset>
+                                <AbsDimension x="10" y="-10"/>
+                            </Offset>
+                        </Anchor>
+                    </Anchors>
+                </FontString>
+                <FontString name="StatCompareSelfEquipFrameText" inherits="GameTooltipText">
+                    <Anchors>
+                        <Anchor point="BOTTOMLEFT" relativeTo="StatCompareSelfEquipFrame" relativePoint="BOTTOMLEFT">
+                            <Offset>
+                                <AbsDimension x="10" y="10"/>
+                            </Offset>
+                        </Anchor>
+                    </Anchors>
+                </FontString>
+            </Layer>
+        </Layers>
+        <Frames>
+            <Button name="StatCompareSelfEquipFrameCloseButton" inherits="UIPanelCloseButton">
+                <Anchors>
+                    <Anchor point="TOPRIGHT" relativeTo="StatCompareSelfEquipFrame" relativePoint="TOPRIGHT">
+                        <Offset>
+                            <AbsDimension x="-1" y="-1"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+            </Button>
+        </Frames>
+    </Frame>
+
+    <Frame name="StatCompareTargetEquipFrame" frameStrata="LOW" toplevel="true" enableMouse="true" movable="true" hidden="true"  parent="UIParent">
+        <TitleRegion setAllPoints="true"/>
+        <Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
+            <EdgeSize>
+                <AbsValue val="16"/>
+            </EdgeSize>
+            <TileSize>
+                <AbsValue val="16"/>
+            </TileSize>
+            <BackgroundInsets>
+                <AbsInset left="5" right="5" top="5" bottom="5"/>
+            </BackgroundInsets>
+        </Backdrop>
+        <Layers>
+            <Layer level="BACKGROUND">
+                <FontString name="StatCompareTargetEquipFrameTitle" inherits="GameTooltipHeaderText">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeTo="StatCompareTargetEquipFrame" relativePoint="TOPLEFT">
+                            <Offset>
+                                <AbsDimension x="10" y="-10"/>
+                            </Offset>
+                        </Anchor>
+                    </Anchors>
+                </FontString>
+                <FontString name="StatCompareTargetEquipFrameText" inherits="GameTooltipText">
+                    <Anchors>
+                        <Anchor point="BOTTOMLEFT" relativeTo="StatCompareTargetEquipFrame" relativePoint="BOTTOMLEFT">
+                            <Offset>
+                                <AbsDimension x="10" y="10"/>
+                            </Offset>
+                        </Anchor>
+                    </Anchors>
+                </FontString>
+            </Layer>
+        </Layers>
+        <Frames>
+            <Button name="StatCompareTargetEquipFrameCloseButton" inherits="UIPanelCloseButton">
+                <Anchors>
+                    <Anchor point="TOPRIGHT" relativeTo="StatCompareTargetEquipFrame" relativePoint="TOPRIGHT">
+                        <Offset>
+                            <AbsDimension x="-1" y="-1"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+            </Button>
+        </Frames>
     </Frame>
 
     <Frame name="StatCompareItemStatFrame" frameStrata="LOW" toplevel="true" enableMouse="true" movable="true" hidden="true"  parent="UIParent">

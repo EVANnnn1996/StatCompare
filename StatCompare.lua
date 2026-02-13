@@ -19,6 +19,8 @@ STATCOMPARE_PREFIX_PATTERN = "^%+(%d+)%%?(.*)$";
 STATCOMPARE_SUFFIX_PATTERN = "^(.*)%+(%d+)%%?$";
 
 STATCOMPARE_ITEMLINK_PATTERN = "|cff(%x+)|Hitem:(%d+:%d+:%d+:%d+)|h%[(.-)%]|h|r";
+STATCOMPARE_MAIN_DISPLAY_GROUPS = { "BasicStats", "TalentSpec", "SpellPowerStats" }
+STATCOMPARE_EQUIP_DISPLAY_GROUPS = { "EquippedItems", "EquippedEnchants" }
 STATCOMPARE_DISPLAY_GROUPS = { "EquippedItems", "EquippedEnchants", "BasicStats", "TalentSpec", "SpellPowerStats" }
 STATCOMPARE_TEXT_INDENT1 = "    "
 STATCOMPARE_TEXT_INDENT2 = "        "
@@ -444,21 +446,24 @@ function StatCompare_OnEvent()
 		StatCompare_isLoaded=1;
 	end
 	if ( (event == "UNIT_INVENTORY_CHANGED") and StatCompare_enable and StatCompare_isLoaded==1) then
-		if ((arg1 == "player") and StatCompareSelfFrame:IsVisible()) then
+		if ((arg1 == "player") and (StatCompareSelfFrame:IsVisible() or StatCompareSelfEquipFrame:IsVisible())) then
 			SCHideFrame(StatCompareSelfFrame);
-			local tiptext = StatCompare_UpdateAndGetTooltipText(StatScanner_bonuses,1);
-			if (StatCompareTargetFrame:IsVisible()) then
-				SCShowFrame(StatCompareSelfFrame,StatCompareTargetFrame,UnitName("player"),tiptext,0,0);
+			SCHideFrame(StatCompareSelfEquipFrame);
+			if (StatCompareTargetFrame:IsVisible() or StatCompareTargetEquipFrame:IsVisible()) then
+				StatCompare_ShowSelfCompareFrames(StatCompareTargetFrame, 5, 0);
 			else
-				SCShowFrame(StatCompareSelfFrame,PaperDollFrame,UnitName("player"),tiptext,-30,-12);
+				StatCompare_ShowPlayerFrames(PaperDollFrame, -30, -12);
 			end
-		elseif ((arg1 == "target") and StatCompare_enable and StatCompare_isLoaded==1 and StatCompareTargetFrame:IsVisible()) then
+		elseif ((arg1 == "target") and (StatCompareTargetFrame:IsVisible() or StatCompareTargetEquipFrame:IsVisible())) then
 			SCHideFrame(StatCompareTargetFrame);
-			local tiptext = StatCompare_UpdateAndGetTooltipText(StatScanner_bonuses,0);
-			SCShowFrame(StatCompareTargetFrame,InspectFrame,UnitName("target"),tiptext,-5,-12);
-
-			tiptext = StatCompare_UpdateAndGetTooltipText(StatScanner_bonuses,1);
-			SCShowFrame(StatCompareSelfFrame,StatCompareTargetFrame,UnitName("player"),tiptext,0,0);
+			SCHideFrame(StatCompareTargetEquipFrame);
+			local anchorFrame = StatCompare_GetTargetAnchorFrame();
+			if anchorFrame then
+				StatCompare_ShowTargetFrames(anchorFrame, -5, -12);
+				if (StatCompareSelfFrame:IsVisible() or StatCompareSelfEquipFrame:IsVisible()) then
+					StatCompare_ShowSelfCompareFrames(StatCompareTargetFrame, 5, 0);
+				end
+			end
 		end
 	elseif ( event == "PLAYER_LOGOUT" ) then
 		-- save the player settings
@@ -479,15 +484,12 @@ function SCDressUpItemLink(link)
 end
 
 function SCPaperDollFrame_OnShow()
-	local tiptext = StatCompare_UpdateAndGetTooltipText(StatScanner_bonuses,1);
-	SCShowFrame(StatCompareSelfFrame,PaperDollFrame,UnitName("player"),tiptext,-30,-12);
-
+	StatCompare_ShowPlayerFrames(PaperDollFrame, -30, -12);
 	oldPaperDollFrame_OnShow();
 end
 
 function SCInspectorFrameShow()
-	local tiptext = StatCompare_UpdateAndGetTooltipText(StatScanner_bonuses,0);
-	SCShowFrame(StatCompareTargetFrame,InspectorFrame,UnitName("target"),tiptext,-5,-12);
+	StatCompare_ShowTargetFrames(InspectorFrame, -5, -12);
 
 	StatScanner_ScanUnit("player");
 	if(SC_BuffScanner_ScanAllInspect) then
@@ -497,8 +499,7 @@ function SCInspectorFrameShow()
 	if(StatCompare_CharStats_Scan) then
 		StatCompare_CharStats_Scan(StatScanner_bonuses, "player");
 	end
-	tiptext = StatCompare_GetTooltipText(StatScanner_bonuses,1);
-	SCShowFrame(StatCompareSelfFrame,StatCompareTargetFrame,UnitName("player"),tiptext,0,0);
+	StatCompare_ShowSelfCompareFrames(StatCompareTargetFrame, 5, 0);
 
 	oldInspectorFrameShow();
 end
@@ -506,27 +507,25 @@ function SCGoodInspect_InspectFrame_Show(unit)
 	oldGoodInspect_InspectFrame_Show(unit);
 	if ( not UnitIsPlayer(unit)) then return; end
 
-	local tiptext = StatCompare_UpdateAndGetTooltipText(StatScanner_bonuses,0);
-	SCShowFrame(StatCompareTargetFrame,InspectFrame,UnitName("target"),tiptext,-5,-12);
-
-	tiptext = StatCompare_UpdateAndGetTooltipText(StatScanner_bonuses,1);
-	SCShowFrame(StatCompareSelfFrame,StatCompareTargetFrame,UnitName("player"),tiptext,0,0);
+	StatCompare_ShowTargetFrames(InspectFrame, -5, -12);
+	StatCompare_ShowSelfCompareFrames(StatCompareTargetFrame, 5, 0);
 
 end
 function SCInspectorFrameHide()
 	SCHideFrame(StatCompareTargetFrame);
 	SCHideFrame(StatCompareSelfFrame);
+	SCHideFrame(StatCompareTargetEquipFrame);
+	SCHideFrame(StatCompareSelfEquipFrame);
 	oldInspectorFrameHide();
 end
 function SCSuperInspect_InspectFrame_Show(unit)
 	SCHideFrame(StatCompareTargetFrame);
 	SCHideFrame(StatCompareSelfFrame);
+	SCHideFrame(StatCompareTargetEquipFrame);
+	SCHideFrame(StatCompareSelfEquipFrame);
 	if (UnitExists(unit) and UnitIsPlayer(unit) and UnitIsFriend(unit, "player")) then
-		local tiptext = StatCompare_UpdateAndGetTooltipText(StatScanner_bonuses,0);
-		SCShowFrame(StatCompareTargetFrame,SuperInspectFrame,UnitName("target"),tiptext,-5,-12);
-
-		tiptext = StatCompare_UpdateAndGetTooltipText(StatScanner_bonuses,1);
-		SCShowFrame(StatCompareSelfFrame,StatCompareTargetFrame,UnitName("player"),tiptext,0,0);
+		StatCompare_ShowTargetFrames(SuperInspectFrame, -5, -12);
+		StatCompare_ShowSelfCompareFrames(StatCompareTargetFrame, 5, 0);
 
 		if IsAddOnLoaded("S_ItemTip") then
 			local score, r, g, b = ItemSocre:ScanUnit("target")
@@ -543,11 +542,97 @@ end
 function SCClearInspectPlayer()
 	SCHideFrame(StatCompareTargetFrame);
 	SCHideFrame(StatCompareSelfFrame);
+	SCHideFrame(StatCompareTargetEquipFrame);
+	SCHideFrame(StatCompareSelfEquipFrame);
 	scoldClearInspectPlayer();
 end
 
 function StatCompare_GetTitlebarText(prefix)
 	return (prefix and prefix .. " / " or "")..GREEN_FONT_COLOR_CODE..STATCOMPARE_ADDON_NAME..FONT_COLOR_CODE_CLOSE.." "..STATCOMPARE_ADDON_VERSION
+end
+
+function StatCompare_GetTargetAnchorFrame()
+	if S_ItemTip_InspectFrame and S_ItemTip_InspectFrame:IsShown() then
+		return S_ItemTip_InspectFrame
+	end
+	if SuperInspectFrame and SuperInspectFrame:IsVisible() then
+		return SuperInspectFrame
+	end
+	if InspectorFrame and InspectorFrame:IsVisible() then
+		return InspectorFrame
+	end
+	if InspectFrame and InspectFrame:IsVisible() then
+		return InspectFrame
+	end
+	return nil
+end
+
+function StatCompare_ShouldShowEquipment(bSelfStat)
+	return StatCompare_GetDisplayGroupSetting(bSelfStat, "EquippedItems") or StatCompare_GetDisplayGroupSetting(bSelfStat, "EquippedEnchants")
+end
+
+function StatCompare_GetEquipmentDisplayText(unit)
+	if StatCompare_GetEquippedItemNamesAndEnchantsDisplayText then
+		return StatCompare_GetEquippedItemNamesAndEnchantsDisplayText(unit)
+	end
+	return ""
+end
+
+function StatCompare_ShowEquipmentFrame(unit, anchorFrame, anchorX, anchorY)
+	local bSelfStat = (unit == "player" and 1 or 0)
+	local frame = unit == "player" and StatCompareSelfEquipFrame or StatCompareTargetEquipFrame
+	if not frame then return nil end
+	if not StatCompare_ShouldShowEquipment(bSelfStat) then
+		SCHideFrame(frame)
+		return nil
+	end
+	local tiptext = StatCompare_GetEquipmentDisplayText(unit)
+	if not tiptext or tiptext == "" then
+		SCHideFrame(frame)
+		return nil
+	end
+	SCShowFrame(frame, anchorFrame, UnitName(unit), tiptext, anchorX, anchorY)
+	return frame
+end
+
+function StatCompare_ShowPlayerFrames(anchorFrame, anchorX, anchorY)
+	if S_ItemTip_InspectFrame and S_ItemTip_InspectFrame:IsShown() then
+		anchorFrame = S_ItemTip_InspectFrame
+		anchorX = 0
+		anchorY = 0
+	end
+	local equipFrame = StatCompare_ShowEquipmentFrame("player", anchorFrame, anchorX, anchorY)
+	local tiptext = StatCompare_UpdateAndGetTooltipText(StatScanner_bonuses,1)
+	if equipFrame then
+		SCShowFrame(StatCompareSelfFrame, equipFrame, UnitName("player"), tiptext, 5, 0)
+	else
+		SCShowFrame(StatCompareSelfFrame, anchorFrame, UnitName("player"), tiptext, anchorX, anchorY)
+	end
+end
+
+function StatCompare_ShowTargetFrames(anchorFrame, anchorX, anchorY)
+	if S_ItemTip_InspectFrame and S_ItemTip_InspectFrame:IsShown() then
+		anchorFrame = S_ItemTip_InspectFrame
+		anchorX = 0
+		anchorY = -2
+	end
+	local equipFrame = StatCompare_ShowEquipmentFrame("target", anchorFrame, anchorX, anchorY)
+	local tiptext = StatCompare_UpdateAndGetTooltipText(StatScanner_bonuses,0)
+	if equipFrame then
+		SCShowFrame(StatCompareTargetFrame, equipFrame, UnitName("target"), tiptext, 5, 0)
+	else
+		SCShowFrame(StatCompareTargetFrame, anchorFrame, UnitName("target"), tiptext, anchorX, anchorY)
+	end
+end
+
+function StatCompare_ShowSelfCompareFrames(anchorFrame, anchorX, anchorY)
+	local equipFrame = StatCompare_ShowEquipmentFrame("player", anchorFrame, anchorX, anchorY)
+	local tiptext = StatCompare_UpdateAndGetTooltipText(StatScanner_bonuses,1)
+	if equipFrame then
+		SCShowFrame(StatCompareSelfFrame, equipFrame, UnitName("player"), tiptext, 5, 0)
+	else
+		SCShowFrame(StatCompareSelfFrame, anchorFrame, UnitName("player"), tiptext, anchorX, anchorY)
+	end
 end
 
 function SCShowFrame(frame,target,tiptitle,tiptext,anchorx,anchory)
@@ -573,7 +658,7 @@ function SCShowFrame(frame,target,tiptitle,tiptext,anchorx,anchory)
 		frame:Hide();
 	else
 		local showSelfFrame = StatCompare_GetSetting("ShowSelfFrame");
-		if(StatCompareTargetFrame:IsVisible() and showSelfFrame == 0 and frame == StatCompareSelfFrame) then
+		if(StatCompareTargetFrame:IsVisible() and showSelfFrame == 0 and (frame == StatCompareSelfFrame or frame == StatCompareSelfEquipFrame)) then
 			frame:Hide();
 		else
 			frame:Show();
@@ -587,6 +672,7 @@ end
 
 function SCPaperDollFrame_OnHide()
 	SCHideFrame(StatCompareSelfFrame);
+	SCHideFrame(StatCompareSelfEquipFrame);
 	oldPaperDollFrame_OnHide();
 end
 
@@ -599,17 +685,16 @@ function SCInspectFrame_Show(unit)
 		InspectFrame.unit = unit;
 		ShowUIPanel(InspectFrame);
 
-		local tiptext = StatCompare_UpdateAndGetTooltipText(StatScanner_bonuses,0);
-		SCShowFrame(StatCompareTargetFrame,InspectFrame,UnitName("target"),tiptext,-5,-12);
-
-		tiptext = StatCompare_UpdateAndGetTooltipText(StatScanner_bonuses,1);
-		SCShowFrame(StatCompareSelfFrame,StatCompareTargetFrame,UnitName("player"),tiptext,0,0);
+		StatCompare_ShowTargetFrames(InspectFrame, -5, -12);
+		StatCompare_ShowSelfCompareFrames(StatCompareTargetFrame, 5, 0);
 	end
 end
 
 function SCInspectFrame_OnHide()
 	SCHideFrame(StatCompareTargetFrame);
 	SCHideFrame(StatCompareSelfFrame);
+	SCHideFrame(StatCompareTargetEquipFrame);
+	SCHideFrame(StatCompareSelfEquipFrame);
 	oldInspectFrame_OnHide();
 end
 
@@ -812,13 +897,8 @@ function StatCompare_GetTooltipText(bonuses,bSelfStat)
 	if StatCompare_GetDisplayGroupSetting(bSelfStat, "SpellPowerStats") and StatCompare_GetSpellsTooltipText then
 		retstr= retstr..StatCompare_GetSpellsTooltipText(StatScanner_bonuses, bSelfStat == 1 and "player" or "target");
 	end
-
-	if StatCompare_GetDisplayGroupSetting(bSelfStat, "EquippedItems") or StatCompare_GetDisplayGroupSetting(bSelfStat, "EquippedEnchants") == true and StatCompare_GetEquippedItemNamesAndEnchantsDisplayText then
-		local itemsandenchants=StatCompare_GetEquippedItemNamesAndEnchantsDisplayText(bSelfStat==1 and "player" or "target")
-		retstr=retstr.."\n\n"..itemsandenchants
-	end
 	
-	if StatCompare_IsAllHidden(bSelfStat) and nvl(StatCompare_IsTutorialInstalled,false) == true then
+	if StatCompare_IsAllHidden(bSelfStat) and not StatCompare_ShouldShowEquipment(bSelfStat) and nvl(StatCompare_IsTutorialInstalled,false) == true then
 		local tutorialtext = StatCompare_GetTutorialText()
 		retstr = retstr .. tutorialtext
 	end
@@ -1112,7 +1192,7 @@ end
 
 function StatCompare_IsAllHidden(bSelfStat)
 	local allHidden = true
-	for _, key in ipairs(STATCOMPARE_DISPLAY_GROUPS) do
+	for _, key in ipairs(STATCOMPARE_MAIN_DISPLAY_GROUPS) do
 		if StatCompare_GetDisplayGroupSetting(bSelfStat, key) == true then
 			allHidden = false
 			break
@@ -1129,7 +1209,7 @@ function StatCompare_UpdateDisplayedAttributeGroups(attributesToToggle, buttonNa
 			getglobal(buttonName):UnlockHighlight();
 		else
 			local willHaveAtLeastOneAttributeVisible = false
-			for _, key in ipairs(STATCOMPARE_DISPLAY_GROUPS) do
+			for _, key in ipairs(STATCOMPARE_MAIN_DISPLAY_GROUPS) do
 				local value = StatCompare_GetDisplayGroupSetting(bSelfStat, key)
 				ignore = false
 				for _, toggle in ipairs(attributesToToggle) do
@@ -1140,7 +1220,7 @@ function StatCompare_UpdateDisplayedAttributeGroups(attributesToToggle, buttonNa
 					break
 				end
 			end
-			if willHaveAtLeastOneAttributeVisible == true or nvl(StatCompare_IsTutorialInstalled,false) == true then
+			if willHaveAtLeastOneAttributeVisible == true or StatCompare_ShouldShowEquipment(bSelfStat) == true or nvl(StatCompare_IsTutorialInstalled,false) == true then
 				StatCompare_SetDisplayGroupSetting(bSelfStat, attributeToToggle, false)
 				getglobal(buttonName):LockHighlight();
 			else
@@ -1153,8 +1233,43 @@ function StatCompare_UpdateDisplayedAttributeGroups(attributesToToggle, buttonNa
 	StatCompare_UpdateFrameContent(frameName, tiptext, unit, UnitName(unit))
 end
 
+function StatCompare_ToggleEquipmentDisplay(unit)
+	local bSelfStat = (unit == "player" and 1 or 0)
+	local shouldShow = not StatCompare_ShouldShowEquipment(bSelfStat)
+	StatCompare_SetDisplayGroupSetting(bSelfStat, "EquippedItems", shouldShow)
+	StatCompare_SetDisplayGroupSetting(bSelfStat, "EquippedEnchants", shouldShow)
+	local buttonName = unit == "player" and "StatCompareSelfFrameArmorButton" or "StatCompareTargetFrameArmorButton"
+	if shouldShow then
+		getglobal(buttonName):UnlockHighlight();
+	else
+		getglobal(buttonName):LockHighlight();
+	end
+	if not shouldShow then
+		if unit == "player" then
+			SCHideFrame(StatCompareSelfEquipFrame);
+		else
+			SCHideFrame(StatCompareTargetEquipFrame);
+		end
+	end
+	if unit == "player" then
+		if (StatCompareTargetFrame:IsVisible() or StatCompareTargetEquipFrame:IsVisible()) then
+			StatCompare_ShowSelfCompareFrames(StatCompareTargetFrame, 5, 0);
+		elseif PaperDollFrame and PaperDollFrame:IsShown() then
+			StatCompare_ShowPlayerFrames(PaperDollFrame, -30, -12);
+		end
+	else
+		local anchorFrame = StatCompare_GetTargetAnchorFrame();
+		if anchorFrame then
+			StatCompare_ShowTargetFrames(anchorFrame, -5, -12);
+			if (StatCompareSelfFrame:IsVisible() or StatCompareSelfEquipFrame:IsVisible()) then
+				StatCompare_ShowSelfCompareFrames(StatCompareTargetFrame, 5, 0);
+			end
+		end
+	end
+end
+
 function StatCompareTargetFrameArmorButton_OnClick()
-	StatCompare_UpdateDisplayedAttributeGroups({"EquippedItems", "EquippedEnchants"},"StatCompareTargetFrameArmorButton", "StatCompareTargetFrame", "target")
+	StatCompare_ToggleEquipmentDisplay("target")
 end
 
 function StatCompareTargetFrameStatsButton_OnClick()
@@ -1162,7 +1277,7 @@ function StatCompareTargetFrameStatsButton_OnClick()
 end
 
 function StatCompareSelfFrameArmorButton_OnClick()
-	StatCompare_UpdateDisplayedAttributeGroups({"EquippedItems", "EquippedEnchants"}, "StatCompareSelfFrameArmorButton", "StatCompareSelfFrame", "player")
+	StatCompare_ToggleEquipmentDisplay("player")
 end
 
 function StatCompareSelfFrameStatsButton_OnClick()
