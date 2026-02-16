@@ -844,12 +844,9 @@ function StatScanner_GetStatsDisplayText(bonuses,bSelfStat)
 				retstr = retstr.. " "
 			end
 
-			retstr = retstr .. StatComparePaintText(e.short,e.name)..": \t";
-			if(SC_BuffScanner_bonuses and SC_BuffScanner_bonuses[e.effect]) then
-				retstr = retstr.. GREEN_FONT_COLOR_CODE..val..FONT_COLOR_CODE_CLOSE;
-			else
-				retstr = retstr.. NORMAL_FONT_COLOR_CODE..val..FONT_COLOR_CODE_CLOSE;
-			end
+			local titleText = e.cat == "RES" and StatComparePaintText(e.short, e.name) or StatComparePaintText("X", e.name)
+			retstr = retstr .. titleText .. ": \t"
+			retstr = retstr .. val
 		end
 	end
 	return retstr;
