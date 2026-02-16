@@ -1653,14 +1653,26 @@ function StatCompare_GetEquippedItemNamesAndEnchantsDisplayText(unit)
 			local link = GetInventoryItemLink(sunit, i)
 			local a, itemId, enchantId, d, e = StatCompare_splitlink(link)
 			local enchantName = StatCompare_GetEnchantName(enchantId)
-			local enchantstr = enchantName and " > " ..enchantName or (enchantId and tonumber(enchantId) > 0 and " > Unknown Enchant - "..GREEN_FONT_COLOR_CODE..enchantId..FONT_COLOR_CODE_CLOSE or "")
-			
-			if StatCompare_IsDebugMode then
-				enchantstr = enchantstr .. (enchantId and tonumber(enchantId)>0 and " (ID:"..GREEN_FONT_COLOR_CODE..enchantId..FONT_COLOR_CODE_CLOSE..")" or "")
+			local enchantLine = nil
+			local enchantPrefix = StatComparePaintText("X", "> ")
+			if enchantName then
+				enchantLine = enchantName
+			elseif enchantId and tonumber(enchantId) > 0 then
+				enchantLine = enchantPrefix .. NORMAL_FONT_COLOR_CODE .. "Unknown Enchant - " .. enchantId .. FONT_COLOR_CODE_CLOSE
+			end
+
+			if enchantId and StatCompare_IsDebugMode then
+				enchantLine = enchantLine .. (enchantId and tonumber(enchantId)>0 and " (ID:"..enchantId..")" or "")
 			end
 			
 			if link then
-				retstr = retstr.."  "..StatComparePaintText("X",(slotname and slotname or "?")..": ")..link..enchantstr.."\n"
+				local baseline = "  "..StatComparePaintText("X",(slotname and slotname or "?")..": ")..link
+				if enchantLine then
+					enchantLine = STATCOMPARE_TEXT_INDENT1 .. STATCOMPARE_TEXT_INDENT1 .. enchantLine
+					retstr = retstr .. baseline .. "\n" .. enchantLine .. "\n"
+				else
+					retstr = retstr .. baseline .. "\n"
+				end
 			end
 		end
 	end
