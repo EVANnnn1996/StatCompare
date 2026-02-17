@@ -548,7 +548,7 @@ function SCClearInspectPlayer()
 end
 
 function StatCompare_GetTitlebarText(prefix)
-	return (prefix and prefix .. " / " or "")..GREEN_FONT_COLOR_CODE..STATCOMPARE_ADDON_NAME..FONT_COLOR_CODE_CLOSE.." "..STATCOMPARE_ADDON_VERSION
+	return (prefix and prefix .. " / " or "")..GREEN_FONT_COLOR_CODE..STATCOMPARE_ADDON_NAME..FONT_COLOR_CODE_CLOSE
 end
 
 function StatCompare_GetTargetAnchorFrame()
@@ -884,11 +884,6 @@ function StatCompare_GetTooltipText(bonuses,bSelfStat)
 
 	if StatCompare_GetDisplayGroupSetting(bSelfStat, "BasicStats") then
 		retstr= retstr..StatScanner_GetStatsDisplayText(bonuses,bSelfStat)
-		retstr= retstr..StatCompare_GetGearsetTooltipText(bonuses,bSelfStat)
-	end
-
-	if StatCompare_GetDisplayGroupSetting(bSelfStat, "TalentSpec") and bSelfStat == 1 and StatCompare_GetTalentSpecToolTipText then
-		retstr= retstr..StatCompare_GetTalentSpecToolTipText()
 	end
 
 	if StatCompare_GetDisplayGroupSetting(bSelfStat, "SpellPowerStats") and StatCompare_GetSpellsTooltipText then
